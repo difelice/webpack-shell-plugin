@@ -8,15 +8,18 @@ const defaultOptions = {
   onBuildExit: [],
   dev: true,
   verbose: false,
-  safe: false
+  safe: false,
+  quiet: false
 };
 
 export default class WebpackShellPlugin {
   constructor(options) {
-    this.options = this.validateInput(this.mergeOptions(options, defaultOptions));
+    this.options = this.validateInput(
+      this.mergeOptions(options, defaultOptions)
+    );
   }
 
-  puts(error, stdout, stderr) {
+  puts(error) {
     if (error) {
       throw error;
     }
@@ -72,13 +75,23 @@ export default class WebpackShellPlugin {
 
     compiler.plugin('compilation', (compilation) => {
       if (this.options.verbose) {
-        console.log(`Report compilation: ${compilation}`);
-        console.warn(`WebpackShellPlugin [${new Date()}]: Verbose is being deprecated, please remove.`);
+        if (!this.options.quiet) {
+          console.log(`Report compilation: ${compilation}`);
+          //eslint-disable-next-line
+          console.warn(`WebpackShellPlugin [${new Date()}]: Verbose is being deprecated, please remove.`);
+        }
       }
       if (this.options.onBuildStart.length) {
-        console.log('Executing pre-build scripts');
-        for (let i = 0; i < this.options.onBuildStart.length; i++) {
-          this.handleScript(this.options.onBuildStart[i]);
+        if (!this.options.quiet) {
+          console.log('Executing pre-build scripts');
+        }
+        for (
+          let index = 0;
+          index < this.options.onBuildStart.length;
+          // eslint-disable-next-line
+          index += 1
+        ) {
+          this.handleScript(this.options.onBuildStart[index]);
         }
         if (this.options.dev) {
           this.options.onBuildStart = [];
@@ -88,9 +101,16 @@ export default class WebpackShellPlugin {
 
     compiler.plugin('after-emit', (compilation, callback) => {
       if (this.options.onBuildEnd.length) {
-        console.log('Executing post-build scripts');
-        for (let i = 0; i < this.options.onBuildEnd.length; i++) {
-          this.handleScript(this.options.onBuildEnd[i]);
+        if (!this.options.quiet) {
+          console.log('Executing post-build scripts');
+        }
+        for (
+          let index = 0;
+          index < this.options.onBuildEnd.length;
+          // eslint-disable-next-line
+          index += 1
+        ) {
+          this.handleScript(this.options.onBuildEnd[index]);
         }
         if (this.options.dev) {
           this.options.onBuildEnd = [];
@@ -101,9 +121,16 @@ export default class WebpackShellPlugin {
 
     compiler.plugin('done', () => {
       if (this.options.onBuildExit.length) {
-        console.log('Executing additional scripts before exit');
-        for (let i = 0; i < this.options.onBuildExit.length; i++) {
-          this.handleScript(this.options.onBuildExit[i]);
+        if (!this.options.quiet) {
+          console.log('Executing additional scripts before exit');
+        }
+        for (
+          let index = 0;
+          index < this.options.onBuildExit.length;
+          // eslint-disable-next-line
+          index += 1
+        ) {
+          this.handleScript(this.options.onBuildExit[index]);
         }
       }
     });
